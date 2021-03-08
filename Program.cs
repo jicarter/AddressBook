@@ -31,21 +31,45 @@ namespace TryCatch
         }
 
 
-       public class AddressBook
-       {
-           public List<Contact> _Contact = new List<Contact>();
-           public string FullName { get; set; }
-           
-           public void AddContact(Contact contact)
-           {
-               _Contact.Add(contact);
-           }
-           public Contact GetByEmail(string Email)
+        public class AddressBook
         {
-            return _Contact[Email];
+            Dictionary<string, Contact> _Contact = new Dictionary<string, Contact>();
+            public void AddContact(Contact contact)
+            {
+                try
+                {
+                    _Contact.Add(contact.Email, contact);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("This person already exists");
+                }
+            }
+            public contactResponse GetByEmail(string Email)
+            {
+                try
+                {
+                    return new contactResponse()
+                    {
+                        isSuccessful = true,
+                        Contact = _Contact[Email]
+                    };
+                }
+                catch
+                {
+                    return new contactResponse()
+                    {
+                        isSuccessful = false
+                    };
+                }
+            }
         }
-       }
 
+        public class contactResponse
+        {
+            public bool isSuccessful { get; set; }
+            public Contact Contact { get; set; }
+        }
 
         static void Main(string[] args)
         {
@@ -97,11 +121,14 @@ namespace TryCatch
             //  Search the AddressBook by email and print the information about each Contact
             foreach (string email in emails)
             {
-                Contact contact = addressBook.GetByEmail(email);
-                Console.WriteLine("----------------------------");
-                Console.WriteLine($"Name: {contact.FullName}");
-                Console.WriteLine($"Email: {contact.Email}");
-                Console.WriteLine($"Address: {contact.Address}");
+                contactResponse contactResponse = addressBook.GetByEmail(email);
+                if (contactResponse.isSuccessful)
+                {
+                    Console.WriteLine("----------------------------");
+                    Console.WriteLine($"Name: {contactResponse.Contact.FullName}");
+                    Console.WriteLine($"Email: {contactResponse.Contact.Email}");
+                    Console.WriteLine($"Address: {contactResponse.Contact.Address}");
+                }
             }
         }
     }
